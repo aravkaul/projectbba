@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1280" />
+<title>EQUIL — The Behavioral Operating System for Money</title>
+<meta name="description" content="EQUIL: Ending the monthly financial destruction cycle with emotion-aware AI. A Financial Just-In-Time Adaptive Intervention. DDTDP Capstone, IIM Bangalore." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EQUIL — Design tokens
+   3-colour system (DDT rule: never more than 3 dominant colours)
+   1) Ink Navy = grounding / "dark recedes & concludes"
+   2) EQUIL Blue = primary brand + all interactive signifiers
+   3) Signal Coral = WARM accent, used ONLY at 1–2 emphasis
+      points per screen (panic moments + the call to action)
+   + neutral paper/white/grey for breathing room
+   ============================================================ */
+:root{
+  --ink:#08152F;          /* deep navy canvas            */
+  --ink-2:#0C1E45;        /* raised navy panel           */
+  --ink-3:#102a5e;        /* navy hover                  */
+  --blue:#2E6BF0;         /* primary brand               */
+  --blue-bright:#5B93FF;  /* lighter brand / glow        */
+  --blue-soft:#A9C6FF;
+  --sky:#DCE9FF;          /* tint                        */
+  --signal:#FF6A45;       /* WARM accent — sparing only  */
+  --signal-2:#FFB020;     /* amber data highlight        */
+  --paper:#F4F6FB;        /* light section bg            */
+  --paper-2:#FFFFFF;
+  --line:#E2E8F4;
+  --line-dark:rgba(140,178,255,.18);
+  --ink-text:#0A1A3A;     /* text on light               */
+  --muted:#5A6B8C;        /* muted text on light         */
+  --paper-text:#EAF1FF;   /* text on dark                */
+  --muted-d:#94A9D4;      /* muted text on dark          */
+
+  --maxw:1180px;
+  --r:18px;
+  --r-sm:12px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+
+  --display:"Bricolage Grotesque",serif;
+  --body:"Hanken Grotesk",sans-serif;
+  --mono:"JetBrains Mono",monospace;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:var(--body);
+  background:var(--ink);
+  color:var(--paper-text);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  line-height:1.5;
+}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.02;margin:0;letter-spacing:-.02em}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);letter-spacing:.02em}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--blue-bright);
+}
+.eyebrow.dark{color:var(--blue)}
+
+/* ---------- Layout helpers ---------- */
+.section{position:relative;padding:104px 0;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 40px;}
+.light{background:var(--paper);color:var(--ink-text);}
+.light .eyebrow{color:var(--blue)}
+.light .muted{color:var(--muted)}
+.dark{background:var(--ink);color:var(--paper-text);}
+.muted{color:var(--muted-d)}
+
+/* Golden-oblong split (≈40/60) — DDT proportion rule, never 50/50 */
+.split{display:grid;grid-template-columns:40fr 60fr;gap:56px;align-items:center;}
+.split.rev{grid-template-columns:60fr 40fr;}
+
+/* ---------- Reveal-on-scroll ---------- */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+.d4{transition-delay:.32s}.d5{transition-delay:.40s}.d6{transition-delay:.48s}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  *{animation:none!important}
+}
+
+/* ============================================================
+   PROGRESS BAR + NAV  (persistent anchors — Norman: knowledge
+   in the world; F-pattern scan along the top edge)
+   ============================================================ */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:120;
+  background:linear-gradient(90deg,var(--blue),var(--blue-bright));}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 40px;
+  background:rgba(8,21,47,.55);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line-dark);
+  transition:background .3s;
+}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--display);
+  font-weight:800;font-size:21px;letter-spacing:.04em;color:#fff;}
+.brand .orb{width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,var(--blue-bright),var(--blue));
+  box-shadow:0 0 0 4px rgba(91,147,255,.18),0 0 18px rgba(91,147,255,.6);}
+.navlinks{display:flex;gap:4px;align-items:center}
+.navlinks a{
+  font-size:13.5px;font-weight:600;color:var(--muted-d);
+  padding:8px 12px;border-radius:9px;transition:.2s;position:relative;
+}
+.navlinks a:hover{color:#fff;background:rgba(91,147,255,.10)}
+.navlinks a.active{color:#fff}
+.navlinks a.active::after{content:"";position:absolute;left:12px;right:12px;bottom:2px;
+  height:2px;border-radius:2px;background:var(--blue-bright)}
+.nav-cta{
+  font-family:var(--body);font-size:13.5px;font-weight:700;
+  background:var(--signal);color:#fff;border:none;cursor:pointer;
+  padding:10px 18px;border-radius:999px;transition:.2s;
+  box-shadow:0 6px 20px rgba(255,106,69,.35);
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(255,106,69,.5)}
+@media (max-width:1080px){.navlinks{display:none}}
+
+/* ============================================================
+   1 · HERO
+   ============================================================ */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  position:relative;overflow:hidden;padding-top:80px;
+  background:
+    radial-gradient(900px 600px at 78% 18%,rgba(46,107,240,.30),transparent 60%),
+    radial-gradient(700px 700px at 12% 90%,rgba(91,147,255,.16),transparent 55%),
+    var(--ink);
+}
+.hero-rings{position:absolute;right:-120px;top:50%;transform:translateY(-50%);
+  width:760px;height:760px;pointer-events:none;opacity:.9}
+.hero-grid{position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:linear-gradient(var(--line-dark) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line-dark) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:radial-gradient(circle at 30% 50%,#000 30%,transparent 78%)}
+.hero-inner{position:relative;z-index:2;max-width:760px}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;margin-bottom:26px;
+  padding:7px 14px 7px 9px;border:1px solid var(--line-dark);border-radius:999px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+.hero-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--signal);
+  box-shadow:0 0 0 4px rgba(255,106,69,.2)}
+h1.hero-h{
+  font-size:clamp(46px,6.4vw,90px);font-weight:800;letter-spacing:-.035em;
+  background:linear-gradient(180deg,#fff 40%,var(--blue-soft));
+  -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:22px;
+}
+h1.hero-h em{font-style:normal;color:var(--blue-bright);
+  background:none;-webkit-text-fill-color:var(--blue-bright)}
+.hero-sub{font-size:19px;color:var(--muted-d);max-width:560px;margin-bottom:36px;line-height:1.55}
+.hero-sub b{color:var(--paper-text);font-weight:600}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.btn{font-family:var(--body);font-weight:700;font-size:15px;cursor:pointer;border:none;
+  padding:15px 26px;border-radius:999px;transition:.22s var(--ease);display:inline-flex;align-items:center;gap:9px}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 30px rgba(46,107,240,.4)}
+.btn-primary:hover{transform:translateY(-2px);background:var(--blue-bright);box-shadow:0 14px 38px rgba(46,107,240,.55)}
+.btn-ghost{background:transparent;color:var(--paper-text);border:1px solid var(--line-dark)}
+.btn-ghost:hover{border-color:var(--blue-bright);background:rgba(91,147,255,.08)}
+.btn .arr{transition:transform .22s}
+.btn:hover .arr{transform:translateX(4px)}
+
+.hero-stats{display:flex;gap:40px;margin-top:54px;flex-wrap:wrap}
+.hstat .n{font-family:var(--display);font-weight:800;font-size:34px;color:#fff;letter-spacing:-.02em}
+.hstat .n .u{color:var(--blue-bright)}
+.hstat .l{font-size:12.5px;color:var(--muted-d);margin-top:2px;max-width:150px}
+
+.scrollcue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:3;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted-d);
+  display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.8}
+.scrollcue .line{width:1px;height:34px;background:linear-gradient(var(--blue-bright),transparent);animation:cue 1.8s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(.2);transform-origin:bottom}}
+
+/* section heading block */
+.shead{max-width:680px;margin-bottom:54px}
+.shead h2{font-size:clamp(30px,3.8vw,50px);margin:16px 0 16px;letter-spacing:-.03em}
+.shead p{font-size:17.5px}
+.kicker-line{display:flex;align-items:center;gap:12px}
+.kicker-line .bar{width:30px;height:3px;border-radius:3px;background:var(--blue)}
+
+/* ============================================================
+   2 · PROBLEM
+   ============================================================ */
+.problem-quote{font-family:var(--display);font-weight:700;font-size:clamp(26px,3.4vw,42px);
+  line-height:1.12;letter-spacing:-.03em;max-width:900px;margin-bottom:14px}
+.problem-quote .hl{color:var(--signal)}
+.cycle-card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:30px;box-shadow:0 26px 60px -38px rgba(10,26,58,.4)}
+.cycle-stage{display:grid;grid-template-columns:38px 1fr;gap:14px;padding:13px 12px;border-radius:12px;
+  cursor:pointer;transition:.2s;border:1px solid transparent}
+.cycle-stage:hover,.cycle-stage.on{background:var(--paper);border-color:var(--line)}
+.cycle-stage .num{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:14px;color:#fff;background:var(--blue)}
+.cycle-stage.danger .num{background:var(--signal)}
+.cycle-stage h4{font-size:15.5px;color:var(--ink-text)}
+.cycle-stage .day{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+.cycle-stage p{font-size:13px;color:var(--muted);margin-top:3px;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),margin .35s}
+.cycle-stage.on p{max-height:60px;margin-top:6px}
+
+.persona{display:flex;gap:14px;align-items:center;padding:16px;border-radius:14px;
+  background:linear-gradient(120deg,var(--ink),var(--ink-2));margin-bottom:22px}
+.persona .pic{width:52px;height:52px;border-radius:50%;flex:0 0 auto;
+  background:radial-gradient(circle at 35% 30%,var(--blue-bright),var(--blue));display:grid;place-items:center;font-size:24px}
+.persona .pt{font-family:var(--display);font-weight:700;font-size:16px;color:#fff}
+.persona .ps{font-size:12.5px;color:var(--muted-d)}
+
+.chart-card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:26px 26px 18px;
+  box-shadow:0 26px 60px -40px rgba(10,26,58,.35)}
+.chart-card .ct{font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink-text);margin-bottom:2px}
+.chart-card .cs{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.legend{display:flex;gap:18px;margin-top:8px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:3px;margin-right:6px;vertical-align:middle}
+
+.takeaway{margin-top:40px;padding:26px 30px;border-left:4px solid var(--signal);
+  background:var(--paper-2);border-radius:0 var(--r) var(--r) 0;box-shadow:0 20px 50px -40px rgba(10,26,58,.4)}
+.takeaway b{color:var(--ink-text)}
+
+/* ============================================================
+   3 · WHY IT HAPPENS  (mechanism cards)
+   ============================================================ */
+.mech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.mech{position:relative;border:1px solid var(--line-dark);border-radius:var(--r);padding:28px 26px;
+  background:linear-gradient(165deg,var(--ink-2),var(--ink));overflow:hidden;transition:.3s var(--ease)}
+.mech:hover{transform:translateY(-6px);border-color:var(--blue);box-shadow:0 30px 60px -36px rgba(46,107,240,.6)}
+.mech .tagn{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--blue-bright);text-transform:uppercase}
+.mech h3{font-size:21px;color:#fff;margin:8px 0 12px}
+.mech p{font-size:14px;color:var(--muted-d);line-height:1.55}
+.mech .bignum{font-family:var(--display);font-weight:800;font-size:46px;letter-spacing:-.03em;
+  color:var(--blue-bright);margin:18px 0 4px}
+.mech.warm .bignum{color:var(--signal)}
+.mech .nl{font-size:12px;color:var(--muted-d)}
+.mech .ico{position:absolute;top:24px;right:24px;font-size:22px;opacity:.5}
+
+.timeline{margin-top:46px;position:relative;padding:36px 10px 8px}
+.timeline .rail{position:absolute;left:6%;right:6%;top:46px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,#22c55e,var(--blue),var(--signal))}
+.tl-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tl-node{text-align:center;position:relative}
+.tl-node .dot{width:18px;height:18px;border-radius:50%;margin:0 auto 22px;border:4px solid var(--ink);position:relative;z-index:2}
+.tl-node:nth-child(1) .dot{background:#22c55e}.tl-node:nth-child(2) .dot{background:var(--blue)}.tl-node:nth-child(3) .dot{background:var(--signal)}
+.tl-node .ph{font-family:var(--display);font-weight:700;font-size:15px;color:#fff}
+.tl-node .dy{font-family:var(--mono);font-size:11px;color:var(--muted-d);letter-spacing:.1em}
+.tl-node .ds{font-size:12.5px;color:var(--muted-d);margin-top:6px}
+
+.note-band{margin-top:38px;border-radius:var(--r);padding:24px 28px;
+  background:linear-gradient(120deg,rgba(46,107,240,.16),rgba(255,106,69,.10));
+  border:1px solid var(--line-dark);font-size:15px}
+.note-band b{color:#fff}
+
+/* ============================================================
+   4 · SCALE / MARKET
+   ============================================================ */
+.tam-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:46px}
+.tam{border:1px solid var(--line);background:var(--paper-2);border-radius:var(--r);padding:26px;
+  position:relative;overflow:hidden;transition:.3s var(--ease)}
+.tam:hover{transform:translateY(-5px);box-shadow:0 30px 60px -42px rgba(10,26,58,.5)}
+.tam .bar{position:absolute;left:0;top:0;bottom:0;width:5px}
+.tam.t1 .bar{background:var(--ink)}.tam.t2 .bar{background:var(--blue)}.tam.t3 .bar{background:var(--signal)}
+.tam .lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tam .big{font-family:var(--display);font-weight:800;font-size:52px;letter-spacing:-.03em;color:var(--ink-text);margin:6px 0 4px}
+.tam.t1 .big{color:var(--ink-text)}.tam.t2 .big{color:var(--blue)}.tam.t3 .big{color:var(--signal)}
+.tam .sub{font-weight:600;font-size:14px;color:var(--ink-text);margin-bottom:8px}
+.tam .desc{font-size:13px;color:var(--muted);line-height:1.5}
+
+.ctx-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;background:var(--paper-2)}
+.ctx{padding:24px 26px;border-right:1px solid var(--line)}
+.ctx:last-child{border-right:none}
+.ctx .n{font-family:var(--display);font-weight:800;font-size:32px;color:var(--ink-text);letter-spacing:-.02em}
+.ctx .n .u{color:var(--blue)}
+.ctx .l{font-size:13px;color:var(--muted);margin-top:4px}
+.ctx .src{font-family:var(--mono);font-size:10px;color:var(--muted);opacity:.7;margin-top:6px;letter-spacing:.06em}
+
+/* ============================================================
+   5 · SOLUTION + INTERACTIVE BVS ENGINE
+   ============================================================ */
+.formula{font-family:var(--mono);font-size:clamp(15px,1.9vw,22px);color:var(--blue-soft);
+  background:var(--ink-2);border:1px solid var(--line-dark);border-radius:14px;
+  padding:18px 22px;display:inline-block;margin:6px 0 4px}
+.formula b{color:#fff}
+.factor-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.factor{border:1px solid var(--line-dark);border-radius:14px;padding:16px 18px;background:rgba(12,30,69,.5)}
+.factor .ft{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--blue-bright)}
+.factor .fd{font-size:12.5px;color:var(--muted-d);margin-top:6px;line-height:1.5}
+
+/* BVS engine */
+.bvs{display:grid;grid-template-columns:54fr 46fr;gap:30px;align-items:stretch;margin-top:10px}
+.bvs-panel{background:linear-gradient(165deg,var(--ink-2),var(--ink));border:1px solid var(--line-dark);
+  border-radius:var(--r);padding:30px}
+.bvs-panel .pt{font-family:var(--display);font-weight:700;font-size:18px;color:#fff;margin-bottom:4px}
+.bvs-panel .pd{font-size:13px;color:var(--muted-d);margin-bottom:22px}
+.sld{margin-bottom:20px}
+.sld .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.sld .name{font-size:13.5px;font-weight:600;color:var(--paper-text)}
+.sld .name span{font-family:var(--mono);font-size:11px;color:var(--blue-bright);margin-left:4px}
+.sld .val{font-family:var(--mono);font-size:13px;color:var(--blue-bright)}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:6px;outline:none;
+  background:linear-gradient(90deg,var(--blue) var(--p,40%),rgba(255,255,255,.12) var(--p,40%));}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:#fff;cursor:pointer;border:4px solid var(--blue);box-shadow:0 3px 10px rgba(0,0,0,.4);transition:.15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;cursor:pointer;border:4px solid var(--blue)}
+.payday-tog{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:13px;color:var(--muted-d)}
+.tog{width:42px;height:24px;border-radius:999px;background:rgba(255,255,255,.14);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.tog.on{background:var(--signal)}.tog.on::after{left:21px}
+
+.gauge-panel{background:var(--ink-2);border:1px solid var(--line-dark);border-radius:var(--r);
+  padding:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.gauge-wrap{position:relative;width:240px;height:140px;margin-bottom:6px}
+#needle{transform-origin:120px 120px;transition:transform .5s var(--ease)}
+.bvs-read{font-family:var(--display);font-weight:800;font-size:54px;letter-spacing:-.03em;line-height:1}
+.bvs-state{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+  padding:7px 16px;border-radius:999px;margin-top:14px;display:inline-block;transition:.3s}
+.interv{margin-top:20px;width:100%;border-radius:14px;padding:16px 18px;text-align:left;
+  background:rgba(8,21,47,.7);border:1px solid var(--line-dark);transition:.3s}
+.interv .il{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-d)}
+.interv .ih{font-family:var(--display);font-weight:700;font-size:16px;color:#fff;margin:4px 0 6px}
+.interv .ip{font-size:13px;color:var(--muted-d);line-height:1.5}
+
+/* phone mockups */
+.phones{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:14px}
+.phone{border:1px solid var(--line-dark);border-radius:26px;background:linear-gradient(180deg,var(--ink-2),var(--ink));
+  padding:14px;position:relative;transition:.3s var(--ease)}
+.phone:hover{transform:translateY(-7px);box-shadow:0 36px 70px -40px rgba(46,107,240,.6)}
+.phone .screen{border-radius:16px;background:#0a1733;border:1px solid var(--line-dark);min-height:230px;padding:14px;overflow:hidden;position:relative}
+.phone .notch{width:46px;height:5px;border-radius:5px;background:rgba(255,255,255,.2);margin:2px auto 12px}
+.phone .pcap{font-family:var(--display);font-weight:700;font-size:15px;color:#fff;margin-top:14px}
+.phone .pcd{font-size:12px;color:var(--muted-d);margin-top:3px}
+.bubble{border-radius:12px;padding:10px 12px;font-size:11.5px;line-height:1.4;margin-bottom:8px;max-width:86%}
+.bubble.user{background:var(--signal);color:#fff;margin-left:auto}
+.bubble.ai{background:rgba(255,255,255,.08);color:var(--paper-text);border:1px solid var(--line-dark)}
+.safenet{border:1px solid #2bb673;border-radius:10px;padding:9px 11px;margin-top:6px}
+.safenet .sl{font-size:9.5px;color:#3ad48c;letter-spacing:.08em}
+.safenet .sn{font-family:var(--mono);font-weight:700;font-size:18px;color:#fff}
+.mini-app-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border-radius:9px;padding:8px 10px;margin-bottom:6px;font-size:11px;color:var(--paper-text)}
+.mini-app-row .a{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted-d)}
+.spend-toggle-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:10px;padding:11px 12px;margin-bottom:10px}
+.spend-toggle-row .st{font-family:var(--display);font-weight:700;font-size:14px;color:#fff}
+.mode-card{border:1px solid var(--line-dark);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--muted-d);margin-bottom:8px}
+.mode-card b{color:#fff;font-family:var(--display)}
+
+/* ============================================================
+   6 · HOW IT WORKS  (tabbed moments)
+   ============================================================ */
+.tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.tab{font-family:var(--body);font-weight:700;font-size:14px;cursor:pointer;border:1px solid var(--line);
+  background:var(--paper-2);color:var(--muted);padding:12px 20px;border-radius:999px;transition:.2s;display:flex;align-items:center;gap:9px}
+.tab .tn{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:11px;background:var(--line);color:var(--muted)}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab.on .tn{background:var(--blue);color:#fff}
+.moment{display:none}
+.moment.on{display:block;animation:fade .45s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.flow-steps{display:flex;flex-direction:column;gap:0}
+.fstep{display:grid;grid-template-columns:32px 1fr;gap:14px;padding-bottom:22px;position:relative}
+.fstep:not(:last-child)::before{content:"";position:absolute;left:15px;top:34px;bottom:0;width:2px;background:var(--line)}
+.fstep .fn{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:700;font-size:13px;z-index:2}
+.fstep.warm .fn{background:var(--signal)}
+.fstep h4{font-size:15px;color:var(--ink-text)}
+.fstep p{font-size:13px;color:var(--muted);margin-top:3px}
+.fmsg{background:var(--ink);border-radius:14px;padding:22px;align-self:start}
+.fmsg .ml{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue-bright)}
+.fmsg .mq{font-family:var(--display);font-weight:700;font-size:18px;color:#fff;line-height:1.3;margin:10px 0 16px;font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px}
+.chip.ok{background:rgba(43,182,115,.16);color:#3ad48c;border:1px solid rgba(43,182,115,.3)}
+.chip.no{background:rgba(255,106,69,.14);color:#ff8b6c;border:1px solid rgba(255,106,69,.3)}
+
+/* ============================================================
+   7 · DIFFERENTIATORS
+   ============================================================ */
+.cmp-table{width:100%;border-collapse:collapse;border:1px solid var(--line-dark);border-radius:var(--r);overflow:hidden}
+.cmp-table th,.cmp-table td{padding:16px 20px;text-align:left;font-size:14px;border-bottom:1px solid var(--line-dark)}
+.cmp-table thead th{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--ink-2);color:var(--muted-d)}
+.cmp-table thead th:last-child{color:var(--blue-bright)}
+.cmp-table td:first-child{font-weight:700;color:#fff;font-family:var(--display)}
+.cmp-table td:nth-child(2){color:var(--muted-d)}
+.cmp-table td:last-child{color:var(--paper-text);font-weight:600}
+.cmp-table tbody tr:hover{background:rgba(46,107,240,.07)}
+.cmp-table tr:last-child td{border-bottom:none}
+
+.autopsy{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:30px}
+.dead{border:1px solid var(--line-dark);border-radius:14px;padding:20px;background:var(--ink-2);transition:.3s}
+.dead:hover{transform:translateY(-5px)}
+.dead .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:12px}
+.dead.fail .tag{background:rgba(255,106,69,.15);color:#ff8b6c}
+.dead.win .tag{background:rgba(43,182,115,.16);color:#3ad48c}
+.dead h4{font-size:16px;color:#fff;margin-bottom:4px}
+.dead .v{font-family:var(--display);font-weight:800;font-size:22px;color:var(--blue-bright);margin:6px 0}
+.dead.win .v{color:#3ad48c}
+.dead p{font-size:12px;color:var(--muted-d);line-height:1.5}
+.dead .qz{font-size:11.5px;font-style:italic;color:var(--muted-d);margin-top:10px;padding-top:10px;border-top:1px solid var(--line-dark)}
+
+.structural{margin-top:30px;border-radius:var(--r);padding:26px 30px;
+  background:linear-gradient(120deg,var(--blue),#1746b5);color:#fff}
+.structural h3{font-size:20px;margin-bottom:8px}
+.structural p{font-size:14.5px;color:rgba(255,255,255,.9);line-height:1.6}
+
+/* ============================================================
+   8 · PROOF / BUSINESS MODEL
+   ============================================================ */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:34px}
+.met{border:1px solid var(--line);background:var(--paper-2);border-radius:14px;padding:20px;transition:.3s}
+.met:hover{transform:translateY(-4px);box-shadow:0 24px 50px -40px rgba(10,26,58,.4)}
+.met .l{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.met .v{font-family:var(--display);font-weight:800;font-size:34px;color:var(--ink-text);letter-spacing:-.02em;margin-top:6px}
+.met.hl .v{color:var(--blue)}
+.met.warm .v{color:var(--signal)}
+.met .s{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+.rev-streams{display:grid;grid-template-columns:48fr 52fr;gap:30px;align-items:center}
+.stream-list{list-style:none;padding:0;margin:0}
+.stream-list li{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.stream-list li:last-child{border-bottom:none}
+.stream-list .d{width:12px;height:12px;border-radius:3px;flex:0 0 auto}
+.stream-list .sn{font-weight:600;font-size:14.5px;color:var(--ink-text)}
+.stream-list .sp{margin-left:auto;font-family:var(--mono);font-weight:700;font-size:14px;color:var(--blue)}
+
+.refs{margin-top:36px;border-top:1px solid var(--line);padding-top:26px}
+.refs .rt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.ref-chips{display:flex;flex-wrap:wrap;gap:10px}
+.ref-chip{font-size:12px;border:1px solid var(--line);background:var(--paper-2);border-radius:999px;padding:8px 14px;color:var(--muted);transition:.2s}
+.ref-chip:hover{border-color:var(--blue);color:var(--ink-text)}
+.ref-chip b{color:var(--ink-text);font-weight:700}
+
+/* ============================================================
+   9 · ETHICS
+   ============================================================ */
+.ethic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.ethic{border:1px solid var(--line-dark);border-radius:var(--r);overflow:hidden;background:var(--ink-2)}
+.ethic .top{padding:18px 22px;background:rgba(255,106,69,.10);border-bottom:1px solid var(--line-dark)}
+.ethic .top .rl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#ff8b6c}
+.ethic .top h4{font-size:16px;color:#fff;margin-top:6px}
+.ethic .body{padding:18px 22px}
+.ethic .body .seg{padding:12px 0;border-bottom:1px dashed var(--line-dark)}
+.ethic .body .seg:last-child{border-bottom:none}
+.ethic .body .sl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.ethic .body .mit .sl{color:var(--blue-bright)}
+.ethic .body .saf .sl{color:#3ad48c}
+.ethic .body p{font-size:12.5px;color:var(--muted-d);line-height:1.5}
+
+.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+.princ{padding:22px 24px;border-left:3px solid var(--blue);background:rgba(46,107,240,.07);border-radius:0 14px 14px 0}
+.princ .pn{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--blue-bright);text-transform:uppercase}
+.princ h4{font-size:16px;color:#fff;margin:6px 0 8px}
+.princ p{font-size:12.5px;color:var(--muted-d);line-height:1.55}
+
+/* ============================================================
+   10 · CTA + TEAM + PROCESS
+   ============================================================ */
+#cta{background:
+  radial-gradient(800px 500px at 50% -10%,rgba(255,106,69,.20),transparent 60%),
+  radial-gradient(700px 600px at 80% 120%,rgba(46,107,240,.25),transparent 60%),
+  var(--ink);text-align:center}
+.cta-h{font-size:clamp(34px,4.6vw,64px);font-weight:800;letter-spacing:-.035em;max-width:900px;margin:0 auto 18px;
+  background:linear-gradient(180deg,#fff,var(--blue-soft));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta-h em{font-style:normal;color:var(--signal);-webkit-text-fill-color:var(--signal)}
+.cta-sub{font-size:18px;color:var(--muted-d);max-width:560px;margin:0 auto 34px}
+
+.team{max-width:920px;margin:64px auto 0;text-align:left}
+.team-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.team-head h3{font-size:22px;color:#fff}
+.team-head .sub{font-family:var(--mono);font-size:12px;color:var(--muted-d);letter-spacing:.08em}
+.team-table{width:100%;border-collapse:collapse;border:1px solid var(--line-dark);border-radius:var(--r);overflow:hidden}
+.team-table th,.team-table td{padding:15px 20px;text-align:left;font-size:14px;border-bottom:1px solid var(--line-dark)}
+.team-table thead th{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--ink-2);color:var(--muted-d)}
+.team-table td:first-child{font-weight:700;color:#fff;font-family:var(--display)}
+.team-table .lead td:first-child::after{content:"LEAD";font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
+  background:var(--blue);color:#fff;padding:2px 7px;border-radius:5px;margin-left:10px;vertical-align:middle}
+.team-table td.roll{font-family:var(--mono);color:var(--blue-soft);font-size:13px}
+.team-table td.mail{color:var(--muted-d);font-size:13px}
+.team-table tbody tr:hover{background:rgba(46,107,240,.08)}
+.team-table tr:last-child td{border-bottom:none}
+
+.process{max-width:920px;margin:54px auto 0;text-align:left}
+.process-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:20px}
+.proc-block{border:1px solid var(--line-dark);border-radius:var(--r);padding:24px;background:var(--ink-2)}
+.proc-block h4{font-size:15px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.proc-step{display:flex;gap:12px;font-size:13px;color:var(--muted-d);padding:7px 0;line-height:1.5}
+.proc-step .pi{font-family:var(--mono);font-weight:700;color:var(--blue-bright);flex:0 0 auto}
+.tool-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.tool-tag{font-size:11.5px;border:1px solid var(--line-dark);border-radius:8px;padding:6px 11px;color:var(--paper-text);background:rgba(46,107,240,.08)}
+.princ-tags .pr-row{display:flex;gap:10px;font-size:12.5px;color:var(--muted-d);padding:7px 0;line-height:1.45}
+.princ-tags .pr-row b{color:var(--blue-bright);font-family:var(--mono);font-size:11px;letter-spacing:.04em;flex:0 0 150px}
+
+footer{background:#050e22;padding:34px 0;border-top:1px solid var(--line-dark);text-align:center}
+footer .fbrand{font-family:var(--display);font-weight:800;font-size:18px;color:#fff;letter-spacing:.04em}
+footer p{font-size:12.5px;color:var(--muted-d);margin-top:8px}
+footer .disc{font-size:11px;color:#5a6b8c;margin-top:14px;max-width:620px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+/* back to top */
+#toTop{position:fixed;right:26px;bottom:26px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-dark);
+  background:rgba(12,30,69,.85);backdrop-filter:blur(8px);color:#fff;cursor:pointer;z-index:90;
+  display:grid;place-items:center;opacity:0;pointer-events:none;transition:.3s;font-size:18px}
+#toTop.show{opacity:1;pointer-events:auto}
+#toTop:hover{background:var(--blue);transform:translateY(-3px)}
+
+@media (max-width:980px){
+  .split,.split.rev,.bvs,.rev-streams,.flow,.process-grid{grid-template-columns:1fr}
+  .mech-grid,.tam-wrap,.ctx-strip,.autopsy,.metrics-grid,.ethic-grid,.principles,.phones,.tl-row,.factor-list{grid-template-columns:1fr}
+  .ctx{border-right:none;border-bottom:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- NAV : persistent F-pattern anchor strip -->
+<nav id="nav">
+  <a class="brand" href="#hero"><span class="orb"></span>EQUIL</a>
+  <div class="navlinks">
+    <a href="#problem">Problem</a>
+    <a href="#why">Why</a>
+    <a href="#scale">Market</a>
+    <a href="#solution">Solution</a>
+    <a href="#how">How it works</a>
+    <a href="#edge">Edge</a>
+    <a href="#proof">Proof</a>
+    <a href="#ethics">Ethics</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('solution').scrollIntoView()">Try the BVS engine →</button>
+</nav>
+
+<!-- ====================== 1 · HERO ====================== -->
+<header id="hero" class="section">
+  <div class="hero-grid"></div>
+  <svg class="hero-rings" viewBox="0 0 760 760" fill="none">
+    <g stroke="rgba(91,147,255,.35)">
+      <circle cx="380" cy="380" r="120"/><circle cx="380" cy="380" r="180"/>
+      <circle cx="380" cy="380" r="240"/><circle cx="380" cy="380" r="300"/><circle cx="380" cy="380" r="360"/>
+    </g>
+    <circle cx="380" cy="380" r="240" stroke="url(#hg)" stroke-width="3" stroke-dasharray="40 18"
+      style="transform-origin:380px 380px;animation:spin 26s linear infinite"/>
+    <circle cx="380" cy="380" r="300" stroke="url(#hg2)" stroke-width="2" stroke-dasharray="6 22"
+      style="transform-origin:380px 380px;animation:spin 40s linear infinite reverse"/>
+    <circle cx="620" cy="380" r="9" fill="#FF6A45"/>
+    <circle cx="380" cy="140" r="6" fill="#5B93FF"/>
+    <defs>
+      <linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#5B93FF"/><stop offset="1" stop-color="#2E6BF0" stop-opacity="0"/></linearGradient>
+      <linearGradient id="hg2" x1="0" x2="1"><stop offset="0" stop-color="#FF6A45"/><stop offset="1" stop-color="#FF6A45" stop-opacity="0"/></linearGradient>
+    </defs>
+  </svg>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <div class="wrap hero-inner">
+    <span class="hero-tag"><span class="dot"></span>Emotion-Aware Behavioral Finance · IIM Bangalore</span>
+    <h1 class="hero-h reveal in">Ending the monthly <em>destruction cycle</em> with emotion-aware AI.</h1>
+    <p class="hero-sub reveal in d1">Every finance app reads your <b>balance</b>. None of them read your <b>panic</b>. EQUIL is a real-time behavioral intervention that intervenes <b>during</b> the impulse — not in a guilt chart at month-end.</p>
+    <div class="hero-actions reveal in d2">
+      <button class="btn btn-primary" onclick="document.getElementById('solution').scrollIntoView()">See how it works <span class="arr">→</span></button>
+      <button class="btn btn-ghost" onclick="document.getElementById('problem').scrollIntoView()">The problem</button>
+    </div>
+    <div class="hero-stats reveal in d3">
+      <div class="hstat"><div class="n">18<span class="u">B</span></div><div class="l">UPI transactions every month — every one frictionless</div></div>
+      <div class="hstat"><div class="n">300<span class="u">M</span></div><div class="l">Urban salaried Indians trapped in the cycle</div></div>
+      <div class="hstat"><div class="n">68<span class="u">%</span></div><div class="l">Of finance-app users churn within 3 months</div></div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>Scroll</span><span class="line"></span></div>
+</header>
+
+<!-- ====================== 2 · PROBLEM ====================== -->
+<section id="problem" class="section light">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">01 · The Problem</span></div>
+      <h2 class="problem-quote">A finance app that detects your balance but not your <span class="hl">panic</span> is half a product.</h2>
+      <p class="muted">This is not a financial-literacy failure. It is a <b style="color:var(--ink-text)">behavioral architecture</b> failure — the systems around us make it easy to destroy wealth and hard to protect it.</p>
+    </div>
+
+    <div class="split">
+      <div class="reveal d1">
+        <div class="persona">
+          <div class="pic">🧑🏽‍💼</div>
+          <div><div class="pt">Meet Arjun — 26, Mumbai, salaried</div><div class="ps">Feels rich on Day 1. Acts poor by Day 25. Repeats every month.</div></div>
+        </div>
+        <div class="cycle-card" id="cycleList">
+          <!-- stages injected by JS -->
+        </div>
+      </div>
+
+      <div class="reveal d2">
+        <div class="chart-card">
+          <div class="ct">The 30-Day behavioral collapse</div>
+          <div class="cs">Bank balance crashes as financial-stress index climbs — they cross at the cognitive breaking point.</div>
+          <svg id="balanceChart" viewBox="0 0 520 300" style="width:100%;height:auto"></svg>
+          <div class="legend">
+            <span><i style="background:#2E6BF0"></i>Bank balance (₹)</span>
+            <span><i style="background:#FF6A45"></i>Financial-stress index</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="takeaway reveal">
+      <p style="font-size:16px;line-height:1.6"><b>By the 22nd of every month, Arjun loses 7.7 hours of productive bandwidth to "avoidance fog."</b> We don't just save his money — we reclaim his mental peace by automating resistance to the impulsive default. <span class="muted">That is the product opportunity.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 3 · WHY IT HAPPENS ====================== -->
+<section id="why" class="section dark">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">02 · Why It Happens</span></div>
+      <h2>Three behavioral mechanisms. Documented. Proven. Unaddressed.</h2>
+      <p class="muted">You cannot educate your way out of a dopamine spike. After 40 years of financial-literacy campaigns these biases remain completely unchanged — only a behavioral intervention breaks the cycle.</p>
+    </div>
+
+    <div class="mech-grid">
+      <div class="mech reveal d1">
+        <span class="ico">📲</span>
+        <span class="tagn">Mechanism 01 · Spendception</span>
+        <h3>UPI removes the pain of paying</h3>
+        <p>No physical loss = no psychological cost. Digital payments raise impulse-buying probability by 47%.</p>
+        <div class="bignum mono" data-count="0.47" data-dec="2" data-prefix="β = ">β = 0.47</div>
+        <div class="nl">Path coefficient: digital payment → impulse buying</div>
+      </div>
+      <div class="mech reveal d2">
+        <span class="ico">⏰</span>
+        <span class="tagn">Mechanism 02 · Present Bias</span>
+        <h3>Salary credit resets the "mental budget"</h3>
+        <p>A fresh balance feels like permission. Late-night users see a +14.7% spending spike right after payday.</p>
+        <div class="bignum mono" data-count="14.7" data-dec="1" data-suffix="%">+14.7%</div>
+        <div class="nl">Day-1 post-payday spike, even among the unconstrained</div>
+      </div>
+      <div class="mech warm reveal d3">
+        <span class="ico">🧠</span>
+        <span class="tagn">Mechanism 03 · Stress → Avoidance</span>
+        <h3>Stress creates a cognitive shutdown</h3>
+        <p>Financial stress consumes 6.4 hours of weekly cognitive bandwidth — and only drops when the next paycheck lands.</p>
+        <div class="bignum mono" data-count="6.4" data-dec="1" data-suffix=" hrs">6.4 hrs</div>
+        <div class="nl">Weekly cognitive bandwidth consumed by financial stress</div>
+      </div>
+    </div>
+
+    <div class="timeline reveal">
+      <div class="rail"></div>
+      <div class="tl-row">
+        <div class="tl-node"><div class="dot"></div><div class="ph">Payment-trigger phase</div><div class="dy">DAYS 1–7</div><div class="ds">Digital-payment dopamine boost</div></div>
+        <div class="tl-node"><div class="dot"></div><div class="ph">Mental-budget acceleration</div><div class="dy">DAYS 8–20</div><div class="ds">Resets & present-bias dominance</div></div>
+        <div class="tl-node"><div class="dot"></div><div class="ph">Stress & avoidance phase</div><div class="dy">DAYS 21–30</div><div class="ds">Cognitive bandwidth depletion</div></div>
+      </div>
+    </div>
+
+    <div class="note-band reveal">
+      <b>One monthly cycle. Three mechanisms. Zero current finance apps detect or address any of them.</b> These are peer-reviewed, empirically validated patterns — not opinion. Education cannot fix a behavioral-architecture problem.
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 4 · SCALE / MARKET ====================== -->
+<section id="scale" class="section light">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">03 · Audience & Market</span></div>
+      <h2>Capturing 300 million urban salaried workers at their exact point of failure.</h2>
+      <p class="muted">We don't acquire users randomly. We acquire them at the moment of salary credit and intervene inside the 48-hour payday window.</p>
+    </div>
+
+    <div class="tam-wrap">
+      <div class="tam t1 reveal d1"><span class="bar"></span><div class="lab">TAM · Total Addressable</div><div class="big mono" data-count="300" data-suffix="M">300M</div><div class="sub">India's urban workforce</div><div class="desc">Every formally employed urban professional — the maximum theoretical market.</div></div>
+      <div class="tam t2 reveal d2"><span class="bar"></span><div class="lab">SAM · Serviceable Available</div><div class="big mono" data-count="120" data-suffix="M">120M</div><div class="sub">Digitally-native Millennials & Gen Z</div><div class="desc">Highly susceptible to "spendception" on salary credit due to payday-window behavior.</div></div>
+      <div class="tam t3 reveal d3"><span class="bar"></span><div class="lab">SOM · Serviceable Obtainable</div><div class="big mono" data-count="500" data-suffix="k">500k</div><div class="sub">Year 1–3 immediate capture</div><div class="desc">Users mathematically proven most vulnerable to the Day 15–25 stress phase.</div></div>
+    </div>
+
+    <div class="ctx-strip reveal">
+      <div class="ctx"><div class="n mono"><span class="u">2,100</span>+</div><div class="l">Fintech apps in India — all transactional, none behavioral</div><div class="src">NASSCOM 2024</div></div>
+      <div class="ctx"><div class="n mono">₹6,742<span class="u"> Cr</span></div><div class="l">Credit-card defaults in 2024 — up 28% year-on-year</div><div class="src">RBI / Angel One 2025</div></div>
+      <div class="ctx"><div class="n mono"><span class="u">68</span>%</div><div class="l">Of finance-app users churn within 3 months</div><div class="src">AppsFlyer 2024</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 5 · SOLUTION + BVS ENGINE ====================== -->
+<section id="solution" class="section dark">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">04 · The Solution</span></div>
+      <h2>EQUIL — a Financial JITAI.</h2>
+      <p class="muted">A <b style="color:#fff">Just-In-Time Adaptive Intervention</b>: a peer-reviewed clinical framework, now applied to money. EQUIL scores your real-time <b style="color:#fff">Behavioral Vulnerability</b> and intervenes only when it matters.</p>
+    </div>
+
+    <div class="split" style="margin-bottom:64px">
+      <div class="reveal d1">
+        <div class="formula"><b>BVS</b> = 1 / (1 + e<sup>−(P_W + E_D + S_L + O_A − β)</sup>)</div>
+        <p class="muted" style="font-size:14px;margin-top:14px">A single index between 0 and 1 that compresses four behavioral signals into one decision. The threshold β keeps it honest.</p>
+        <div class="factor-list">
+          <div class="factor"><div class="ft">📉 P_W · Payday Wealth Illusion</div><div class="fd">Models how the "flush-with-cash" feeling fades exponentially after salary lands.</div></div>
+          <div class="factor"><div class="ft">🪫 E_D · Ego Depletion</div><div class="fd">Captures willpower drain via time-of-day and transaction frequency.</div></div>
+          <div class="factor"><div class="ft">💧 S_L · Scarcity / Liquidity</div><div class="fd">Is the payment stress-driven? Spend-to-SafeToSpend ratio.</div></div>
+          <div class="factor"><div class="ft">🙈 O_A · Ostrich / Avoidance</div><div class="fd">App non-engagement weighted by bill-due proximity.</div></div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE BVS ENGINE -->
+      <div class="reveal d2">
+        <div class="bvs" style="grid-template-columns:1fr">
+          <div class="bvs-panel">
+            <div class="pt">Live Behavioral Vulnerability Engine</div>
+            <div class="pd">Drag the four signals. Watch EQUIL re-classify the state and switch the intervention in real time — feedback that's immediate and informative.</div>
+
+            <div class="sld">
+              <div class="row"><span class="name">Payday Wealth Illusion <span>P_W</span></span><span class="val" id="v_pw">0.30</span></div>
+              <input type="range" id="s_pw" min="0" max="1" step="0.01" value="0.30">
+            </div>
+            <div class="sld">
+              <div class="row"><span class="name">Ego Depletion <span>E_D</span></span><span class="val" id="v_ed">0.40</span></div>
+              <input type="range" id="s_ed" min="0" max="1" step="0.01" value="0.40">
+            </div>
+            <div class="sld">
+              <div class="row"><span class="name">Scarcity / Liquidity <span>S_L</span></span><span class="val" id="v_sl">0.30</span></div>
+              <input type="range" id="s_sl" min="0" max="1" step="0.01" value="0.30">
+            </div>
+            <div class="sld">
+              <div class="row"><span class="name">Avoidance / Ostrich <span>O_A</span></span><span class="val" id="v_oa">0.25</span></div>
+              <input type="range" id="s_oa" min="0" max="1" step="0.01" value="0.25">
+            </div>
+            <div class="payday-tog">
+              <div class="tog" id="paydayTog" role="switch" aria-checked="false" tabindex="0"></div>
+              <span>Salary credited &lt; 48 hours ago (Payday risk override)</span>
+            </div>
+          </div>
+
+          <div class="gauge-panel" style="margin-top:24px">
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 240 150">
+                <path d="M20 120 A100 100 0 0 1 220 120" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="16" stroke-linecap="round"/>
+                <path d="M20 120 A100 100 0 0 1 92 30" fill="none" stroke="#22c55e" stroke-width="16" stroke-linecap="round"/>
+                <path d="M92 30 A100 100 0 0 1 168 36" fill="none" stroke="#FFB020" stroke-width="16"/>
+                <path d="M168 36 A100 100 0 0 1 220 120" fill="none" stroke="#FF6A45" stroke-width="16" stroke-linecap="round"/>
+                <g id="needle"><line x1="120" y1="120" x2="120" y2="40" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="120" cy="120" r="8" fill="#fff"/></g>
+              </svg>
+            </div>
+            <div class="bvs-read mono" id="bvsRead" style="color:#22c55e">0.27</div>
+            <span class="bvs-state" id="bvsState" style="background:rgba(34,197,94,.16);color:#3ad48c">Calm State</span>
+            <div class="interv" id="interv">
+              <div class="il">Intervention engaged</div>
+              <div class="ih" id="ivH">Passive tracking</div>
+              <div class="ip" id="ivP">Mild goal reminders only. EQUIL stays quiet and lets you live.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App mockups : dual-channel (image + text) -->
+    <div class="reveal">
+      <div class="eyebrow" style="margin-bottom:8px">The product, in the moment</div>
+      <div class="phones">
+        <div class="phone d1 reveal">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="bubble ai" style="max-width:100%">Hey — it's late. We agreed late-night ordering hurts your car-downpayment goal. You've already hit your dining limit. Can we close the app?</div>
+            <div style="display:flex;gap:8px;margin-top:10px"><span class="chip ok" style="flex:1;text-align:center">Close app</span><span class="chip no" style="flex:1;text-align:center">Explain</span></div>
+          </div>
+          <div class="pcap">Real-time nudging overlay</div>
+          <div class="pcd">Intervenes during high-risk spending — never a hard block.</div>
+        </div>
+        <div class="phone d2 reveal">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="bubble user">I had a bad day at work. I just want comfort food. Don't stop me.</div>
+            <div class="bubble ai">Long days are tough. Take care of yourself tonight — just keep it under ₹500 so it doesn't touch tomorrow's SIP. Enjoy.</div>
+            <div class="safenet"><div class="sl">FINANCIAL SAFETY NET</div><div class="sn mono">₹450</div></div>
+          </div>
+          <div class="pcap">Empathetic AI chat</div>
+          <div class="pcd">Adapts tone to your emotional state, not just your balance.</div>
+        </div>
+        <div class="phone d3 reveal">
+          <div class="screen">
+            <div class="notch"></div>
+            <div class="spend-toggle-row"><span class="st">Spend Mode</span><span class="tog on" style="pointer-events:none"></span></div>
+            <div class="mode-card"><b>Travel / Event Mode</b><br>Live in the moment, guilt-free · until Oct 15</div>
+            <div class="mini-app-row">🍜 Mekong Restaurant <span class="a">muted</span></div>
+            <div class="mini-app-row">🚗 Uber Premium <span class="a">muted</span></div>
+            <div class="mini-app-row">🛍️ Duty Free Hub <span class="a">muted</span></div>
+          </div>
+          <div class="pcap">Spend Mode & Sanctuary</div>
+          <div class="pcd">You stay in control — pause nudges, set your own thresholds.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 6 · HOW IT WORKS ====================== -->
+<section id="how" class="section light">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">05 · How It Works</span></div>
+      <h2>Three moments that change financial behaviour.</h2>
+      <p class="muted">Every intervention is non-punitive, frictionless for essentials, and grounded in behavioral science. Pick a moment to see the flow.</p>
+    </div>
+
+    <div class="tabs reveal">
+      <div class="tab on" data-m="0"><span class="tn">01</span>Payday Model</div>
+      <div class="tab" data-m="1"><span class="tn">02</span>Stress Pulse</div>
+      <div class="tab" data-m="2"><span class="tn">03</span>Avoidance Re-engagement</div>
+    </div>
+
+    <div class="reveal">
+      <!-- moment 0 -->
+      <div class="moment on" data-m="0">
+        <div class="flow">
+          <div class="flow-steps">
+            <div class="fstep"><div class="fn">1</div><div><h4>Salary credit detected</h4><p>EQUIL knows the exact moment money lands.</p></div></div>
+            <div class="fstep"><div class="fn">2</div><div><h4>AI scores present bias</h4><p>Late-night transaction history · P18 method.</p></div></div>
+            <div class="fstep warm"><div class="fn">3</div><div><h4>48-hour friction nudge active</h4><p>Only on Food · Fashion · Entertainment · UPI &gt; ₹1,000.</p></div></div>
+            <div class="fstep"><div class="fn">4</div><div><h4>Essentials stay instant</h4><p>Groceries · Medical · Transport · Utilities — zero friction.</p></div></div>
+          </div>
+          <div class="fmsg">
+            <div class="ml">High-risk prompt</div>
+            <div class="mq">"Visualize ₹8,000 as committed + ₹5,000 EMI. One tap."</div>
+            <div class="chips">
+              <span class="chip ok">Zero friction for essentials</span>
+              <span class="chip ok">No hard blocks</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- moment 1 -->
+      <div class="moment" data-m="1">
+        <div class="flow">
+          <div class="flow-steps">
+            <div class="fstep"><div class="fn">1</div><div><h4>Day 12–15 of pay cycle reached</h4><p>The stress build-up window.</p></div></div>
+            <div class="fstep"><div class="fn">2</div><div><h4>AI reads full transaction history</h4><p>Spend % · days left · committed items.</p></div></div>
+            <div class="fstep"><div class="fn">3</div><div><h4>One optional micro-action offered</h4><p>Calm, single, non-punitive framing.</p></div></div>
+          </div>
+          <div class="fmsg">
+            <div class="ml">Pulse message</div>
+            <div class="mq">"Spent 62% of budget. Rent + EMI covered. ₹4,200 left. Move ₹500 to buffer?"</div>
+            <div class="chips">
+              <span class="chip no">✕ Red numbers</span>
+              <span class="chip no">✕ Debt view</span>
+              <span class="chip no">✕ Month comparisons</span>
+              <span class="chip no">✕ Multiple actions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- moment 2 -->
+      <div class="moment" data-m="2">
+        <div class="flow">
+          <div class="flow-steps">
+            <div class="fstep"><div class="fn">1</div><div><h4>No app open 8+ days &amp; EMI due</h4><p>Classic avoidance signal.</p></div></div>
+            <div class="fstep"><div class="fn">2</div><div><h4>Single soft notification sent</h4><p>Reassurance-first · zero alarm language.</p></div></div>
+            <div class="fstep"><div class="fn">3</div><div><h4>Minimum-action view only</h4><p>Shows what's covered; hides the full debt view.</p></div></div>
+          </div>
+          <div class="fmsg">
+            <div class="ml">Notification</div>
+            <div class="mq">"Your EMI is handled — all good. Here's one thing to look at when you're ready."</div>
+            <div class="chips">
+              <span class="chip ok">Shows: 1 required action</span>
+              <span class="chip no">Hidden: full debt · balance · overdue list</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 7 · DIFFERENTIATORS ====================== -->
+<section id="edge" class="section dark">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">06 · The Competitive Edge</span></div>
+      <h2>The market validated the problem. Every shutdown proves the gap we fill.</h2>
+      <p class="muted">Scale without behavioral depth = churn. Behavioral depth without regulatory clarity = shutdown. EQUIL sits at the intersection.</p>
+    </div>
+
+    <div class="reveal">
+      <table class="cmp-table">
+        <thead><tr><th>Dimension</th><th>Competitors</th><th>EQUIL</th></tr></thead>
+        <tbody>
+          <tr><td>Intervention</td><td>Post-damage dashboards</td><td>Pre-damage, real-time</td></tr>
+          <tr><td>User lens</td><td>Transaction state only</td><td>Emotional state detected</td></tr>
+          <tr><td>Revenue</td><td>D2C / intrusive cross-sell</td><td>B2B-embedded fintech</td></tr>
+          <tr><td>Regulatory</td><td>Investment-advice grey zone</td><td>Behavioral nudging only</td></tr>
+          <tr><td>Scope</td><td>All of personal finance</td><td>One cycle, solved fully</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="autopsy">
+      <div class="dead fail reveal d1"><span class="tag">✕ Shut down Jan 2024</span><h4>Mint (USA)</h4><div class="v mono">3.6M</div><p>Passive dashboard. Assumed information = behavior change.</p><div class="qz">"Showed the guilt. Never stopped the cycle."</div></div>
+      <div class="dead fail reveal d2"><span class="tag">✕ ₹0 revenue model</span><h4>Walnut (India)</h4><div class="v mono">8M+</div><p>Users loved it, refused to pay. Emotionally neutral = dead end.</p><div class="qz">"Tracked everything. Monetized no one."</div></div>
+      <div class="dead fail reveal d3"><span class="tag">✕ Regulatory shutdown</span><h4>Olivia AI (USA)</h4><div class="v mono">VC-backed</div><p>Crossed into investment advice without compliance. Regulators intervened.</p><div class="qz">"Overreached. Under-complied. Done."</div></div>
+      <div class="dead win reveal d4"><span class="tag">✓ The blueprint</span><h4>CRED (India)</h4><div class="v mono">$6.4B</div><p>Solved <b style="color:#fff">one</b> behavioral failure completely, then expanded.</p><div class="qz">"One problem. One loop. Then expand."</div></div>
+    </div>
+
+    <div class="structural reveal">
+      <h3>The structural pattern</h3>
+      <p>CRED proved a single-loop behavioral product can reach $6.4B. EQUIL applies the same discipline — but solves the <b>spending-impulse cycle</b>, not just the payment cycle. One problem, solved fully, then expand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 8 · PROOF / BUSINESS ====================== -->
+<section id="proof" class="section light">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">07 · Proof & Business Model</span></div>
+      <h2>The numbers behind a healthy, defensible business.</h2>
+      <p class="muted">No actual money movement = no PA-license cost. A 36-month behavioral data moat. Unit economics that clear the fintech bar.</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="met hl reveal d1"><div class="l">LTV : CAC</div><div class="v mono">3.4:1</div><div class="s">Healthy band is 3:1 – 4:1</div></div>
+      <div class="met reveal d2"><div class="l">Gross margin</div><div class="v mono" data-count="59" data-suffix="%">59%</div><div class="s">SaaS benchmark 60–75%</div></div>
+      <div class="met reveal d3"><div class="l">Blended rev / user / mo</div><div class="v mono">₹61</div><div class="s">vs ₹7 variable cost</div></div>
+      <div class="met warm reveal d4"><div class="l">Year-3 revenue</div><div class="v mono">₹5.5Cr</div><div class="s">across four streams</div></div>
+    </div>
+
+    <div class="rev-streams reveal">
+      <div>
+        <div class="eyebrow dark" style="margin-bottom:14px">Four revenue streams</div>
+        <ul class="stream-list">
+          <li><span class="d" style="background:#2E6BF0"></span><span class="sn">D2C subscription</span><span class="sp">₹99 / mo</span></li>
+          <li><span class="d" style="background:#5B93FF"></span><span class="sn">Employer B2B (wellness)</span><span class="sp">₹120 / user / mo</span></li>
+          <li><span class="d" style="background:#22c55e"></span><span class="sn">Bank co-distribution</span><span class="sp">₹20 / MAU</span></li>
+          <li><span class="d" style="background:#FF6A45"></span><span class="sn">Behavioral Credit Passport</span><span class="sp">₹7 / verification</span></li>
+        </ul>
+      </div>
+      <div class="chart-card">
+        <div class="ct">Revenue trajectory · Year 1 → 4</div>
+        <div class="cs">₹ lakhs / year, blended across streams</div>
+        <svg id="revChart" viewBox="0 0 480 240" style="width:100%;height:auto"></svg>
+      </div>
+    </div>
+
+    <div class="refs reveal">
+      <div class="rt">Peer-reviewed foundations</div>
+      <div class="ref-chips">
+        <span class="ref-chip"><b>Nahum-Shani et al. 2018</b> · JITAI framework</span>
+        <span class="ref-chip"><b>Thaler 1999</b> · Mental Accounting</span>
+        <span class="ref-chip"><b>Baumeister 2007</b> · Ego Depletion</span>
+        <span class="ref-chip"><b>Mullainathan & Shafir 2013</b> · Scarcity</span>
+        <span class="ref-chip"><b>Karlsson et al. 2009</b> · The Ostrich Effect</span>
+        <span class="ref-chip"><b>Benartzi & Thaler 2004</b> · Save More Tomorrow</span>
+        <span class="ref-chip"><b>NPCI · NASSCOM · RBI · AppsFlyer 2024</b></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 9 · ETHICS ====================== -->
+<section id="ethics" class="section dark">
+  <div class="wrap">
+    <div class="shead reveal">
+      <div class="kicker-line"><span class="bar"></span><span class="eyebrow">08 · Responsible AI</span></div>
+      <h2>Three real risks. Three real answers. No hand-waving.</h2>
+      <p class="muted">EQUIL is a behavioral mirror, not a nanny. It informs and adds friction — it never blocks a transaction or makes a value judgment about your money.</p>
+    </div>
+
+    <div class="ethic-grid">
+      <div class="ethic reveal d1">
+        <div class="top"><div class="rl">⚠ Risk · Manipulation</div><h4>Could it exploit emotional states?</h4></div>
+        <div class="body">
+          <div class="seg mit"><div class="sl">Architectural mitigation</div><p>The product never serves advertisements. No third party can ever reach users in an emotional state.</p></div>
+          <div class="seg saf"><div class="sl">Commercial safeguard</div><p>Zero tolerance for behavioral exploitation, under strict consumer-protection norms.</p></div>
+        </div>
+      </div>
+      <div class="ethic reveal d2">
+        <div class="top"><div class="rl">⚠ Risk · Privacy</div><h4>Where does the inference happen?</h4></div>
+        <div class="body">
+          <div class="seg mit"><div class="sl">Architectural mitigation</div><p>All inference is strictly on-device or inside the RBI-regulated Account Aggregator framework.</p></div>
+          <div class="seg saf"><div class="sl">Commercial safeguard</div><p>Zero raw cycle data on servers. Ephemeral scores. Instant profile deletion.</p></div>
+        </div>
+      </div>
+      <div class="ethic reveal d3">
+        <div class="top"><div class="rl">⚠ Risk · Paternalism</div><h4>Who controls the money?</h4></div>
+        <div class="body">
+          <div class="seg mit"><div class="sl">Architectural mitigation</div><p>Synthetic friction is introduced only during high-risk psychological windows — never a block.</p></div>
+          <div class="seg saf"><div class="sl">Commercial safeguard</div><p>The user holds ultimate authority. EQUIL makes zero value judgments.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="principles">
+      <div class="princ reveal d1"><div class="pn">Core principle 01</div><h4>Absolute user autonomy</h4><p>The AI informs and adds friction. It is constrained to never block a transaction outright.</p></div>
+      <div class="princ reveal d2"><div class="pn">Core principle 02</div><h4>Transparency by design</h4><p>Algorithmic transparency is absolute. The prompt structure and feed are user-editable.</p></div>
+      <div class="princ reveal d3"><div class="pn">Core principle 03</div><h4>Total data sovereignty</h4><p>Zero external monetization. Behavioral data is never sold, licensed, or used for ad targeting.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== 10 · CTA + TEAM + PROCESS ====================== -->
+<section id="cta" class="section">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center">
+      <span class="eyebrow" style="display:block;margin-bottom:20px">09 · The Ask</span>
+      <h2 class="cta-h">Money apps optimize the <em>transaction</em>.<br>EQUIL optimizes the <em>human</em> behind it.</h2>
+      <p class="cta-sub">Detect the panic. Add the pause. Break the cycle — one payday window at a time.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <button class="btn btn-primary" onclick="document.getElementById('solution').scrollIntoView()">Try the BVS engine <span class="arr">→</span></button>
+        <button class="btn btn-ghost" onclick="document.getElementById('hero').scrollIntoView()">Back to the top</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="fbrand">EQUIL</div>
+  <p>The behavioral operating system for money · DDTDP Capstone · IIM Bangalore</p>
+  <p class="disc">Prototype built for academic submission. EQUIL is a behavioral-intervention concept — it informs and adds friction only, never executes trades or moves money. All data figures cited from NPCI, NASSCOM, RBI, AppsFlyer and peer-reviewed behavioral-science literature.</p>
+</footer>
+
+<button id="toTop" aria-label="Back to top">↑</button>
+
+<script>
+/* ---------- scroll progress + back-to-top ---------- */
+const prog=document.getElementById('progress'),toTop=document.getElementById('toTop');
+addEventListener('scroll',()=>{
+  const h=document.documentElement,sc=h.scrollTop,mx=h.scrollHeight-h.clientHeight;
+  prog.style.width=(sc/mx*100)+'%';
+  toTop.classList.toggle('show',sc>700);
+});
+toTop.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+
+/* ---------- scroll-spy nav ---------- */
+const navAs=[...document.querySelectorAll('.navlinks a')];
+const secs=navAs.map(a=>document.querySelector(a.getAttribute('href')));
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){
+    navAs.forEach(a=>a.classList.remove('active'));
+    const i=secs.indexOf(e.target); if(i>-1)navAs[i].classList.add('active');
+  }});
+},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>s&&spy.observe(s));
+
+/* ---------- reveal on scroll + counters ---------- */
+function runCounters(scope){
+  scope.querySelectorAll('[data-count]').forEach(el=>{
+    if(el._done)return; el._done=true;
+    const to=parseFloat(el.dataset.count),dec=+(el.dataset.dec||0),
+      suf=el.dataset.suffix||'',pre=el.dataset.prefix||'';
+    let t0=null,dur=1100;
+    const step=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1),
+      e=1-Math.pow(1-p,3),val=(to*e).toFixed(dec);
+      el.textContent=pre+val+suf; if(p<1)requestAnimationFrame(step);};
+    requestAnimationFrame(step);
+  });
+}
+const rev=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');runCounters(e.target);rev.unobserve(e.target);}});
+},{threshold:.18});
+document.querySelectorAll('.reveal').forEach(el=>rev.observe(el));
+
+/* ---------- 30-day cycle list (problem) ---------- */
+const stages=[
+ {n:1,day:'Day 1',t:'The illusion of wealth',d:'Salary credited (₹65,000). Swiggy & Myntra notifications. Feels rich.'},
+ {n:2,day:'Day 3',t:'The silent break',d:'Mentally broken budget — spending suddenly feels permitted.'},
+ {n:3,day:'Day 15',t:'Stress spending',d:'Zomato & Netflix to cope with a long week.'},
+ {n:4,day:'Day 22',t:'The panic point',danger:1,d:'Credit-card bill arrives: ₹24k due, ₹9k in balance. Red alert.'},
+ {n:5,day:'Day 25',t:'The debt trap',danger:1,d:'Minimum payment made — ₹15k rolls over at 36% APR.'},
+ {n:6,day:'Day 28',t:'The avoidance spiral',d:'Stops opening the app. 7.7 hrs of cognitive bandwidth lost.'},
+ {n:7,day:'Day 30',t:'The cognitive tax',d:'Drained, anxious — and then the whole cycle repeats.'}
+];
+const cl=document.getElementById('cycleList');
+cl.innerHTML=stages.map((s,i)=>`
+  <div class="cycle-stage ${s.danger?'danger':''} ${i===0?'on':''}" data-i="${i}">
+    <div class="num">${s.n}</div>
+    <div><div class="day">${s.day}</div><h4>${s.t}</h4><p>${s.d}</p></div>
+  </div>`).join('');
+cl.querySelectorAll('.cycle-stage').forEach(st=>{
+  st.onclick=()=>{cl.querySelectorAll('.cycle-stage').forEach(x=>x.classList.remove('on'));st.classList.add('on');};
+});
+
+/* ---------- balance vs stress chart ---------- */
+(function(){
+  const days=[1,3,7,11,15,19,22,25,28,30];
+  const bal=[65000,60000,48000,38000,30000,18000,12000,7000,3000,1500];
+  const str=[10,14,20,30,45,62,74,86,96,92];
+  const W=520,H=300,PL=46,PR=20,PT=18,PB=34;
+  const x=d=>PL+(d-1)/29*(W-PL-PR);
+  const yB=v=>PT+(1-v/70000)*(H-PT-PB);
+  const yS=v=>PT+(1-v/100)*(H-PT-PB);
+  const path=(arr,fy)=>arr.map((v,i)=>(i?'L':'M')+x(days[i]).toFixed(1)+' '+fy(v).toFixed(1)).join(' ');
+  let grid='';
+  for(let g=0;g<=70000;g+=14000){const yy=yB(g);grid+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#E2E8F4"/>`+
+    `<text x="${PL-8}" y="${yy+3}" text-anchor="end" font-size="9" fill="#5A6B8C" font-family="JetBrains Mono">${g/1000}k</text>`;}
+  [1,15,30].forEach(d=>grid+=`<text x="${x(d)}" y="${H-12}" text-anchor="middle" font-size="9" fill="#5A6B8C" font-family="JetBrains Mono">Day ${d}</text>`);
+  const balP=path(bal,yB),strP=path(str,yS);
+  const areaP=balP+` L ${x(30)} ${H-PB} L ${x(1)} ${H-PB} Z`;
+  document.getElementById('balanceChart').innerHTML=`
+    <defs><linearGradient id="ba" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2E6BF0" stop-opacity=".22"/><stop offset="1" stop-color="#2E6BF0" stop-opacity="0"/></linearGradient></defs>
+    ${grid}
+    <path d="${areaP}" fill="url(#ba)"/>
+    <path d="${balP}" fill="none" stroke="#2E6BF0" stroke-width="3" stroke-linecap="round" class="cline"/>
+    <path d="${strP}" fill="none" stroke="#FF6A45" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round" class="cline"/>
+    <line x1="${x(20)}" y1="${PT}" x2="${x(20)}" y2="${H-PB}" stroke="#0A1A3A" stroke-width="1" stroke-dasharray="3 4" opacity=".4"/>
+    <text x="${x(20)}" y="${PT+12}" text-anchor="middle" font-size="9" fill="#0A1A3A" font-family="JetBrains Mono">breaking point</text>`;
+  document.querySelectorAll('#balanceChart .cline').forEach(p=>{
+    const L=p.getTotalLength();p.style.strokeDasharray=p.getAttribute('stroke-dasharray')||L;
+    if(!p.getAttribute('stroke-dasharray')){p.style.strokeDashoffset=L;
+      const io=new IntersectionObserver(e=>{if(e[0].isIntersecting){p.style.transition='stroke-dashoffset 1.6s cubic-bezier(.22,.61,.36,1)';p.style.strokeDashoffset=0;io.disconnect();}});
+      io.observe(document.getElementById('balanceChart'));}
+  });
+})();
+
+/* ---------- revenue trajectory bars ---------- */
+(function(){
+  const data=[{y:'Yr 1',v:18},{y:'Yr 2',v:130},{y:'Yr 3',v:400},{y:'Yr 4',v:900}];
+  const W=480,H=240,PL=40,PB=30,PT=14,PR=14,max=1000;
+  const bw=46,gap=((W-PL-PR)-bw*data.length)/(data.length-1);
+  let g='';for(let v=0;v<=1000;v+=250){const yy=PT+(1-v/max)*(H-PT-PB);
+    g+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#E2E8F4"/>`+
+       `<text x="${PL-6}" y="${yy+3}" text-anchor="end" font-size="9" fill="#5A6B8C" font-family="JetBrains Mono">${v}</text>`;}
+  let bars='';data.forEach((d,i)=>{const xx=PL+i*(bw+gap),fh=(d.v/max)*(H-PT-PB),yy=H-PB-fh,col=i===3?'#FF6A45':'#2E6BF0';
+    bars+=`<rect x="${xx}" y="${H-PB}" width="${bw}" height="0" rx="6" fill="${col}" class="rbar" data-h="${fh}" data-y="${yy}"/>`+
+          `<text x="${xx+bw/2}" y="${H-PB+16}" text-anchor="middle" font-size="10" fill="#5A6B8C" font-family="JetBrains Mono">${d.y}</text>`+
+          `<text x="${xx+bw/2}" y="${yy-7}" text-anchor="middle" font-size="11" font-weight="700" fill="#0A1A3A" font-family="JetBrains Mono" class="rlab" opacity="0">₹${d.v}L</text>`;});
+  document.getElementById('revChart').innerHTML=g+bars;
+  const io=new IntersectionObserver(e=>{if(e[0].isIntersecting){
+    document.querySelectorAll('#revChart .rbar').forEach((b,i)=>setTimeout(()=>{
+      b.style.transition='all 1s cubic-bezier(.22,.61,.36,1)';
+      b.setAttribute('height',b.dataset.h);b.setAttribute('y',b.dataset.y);
+      document.querySelectorAll('#revChart .rlab')[i].style.transition='opacity .6s .4s';
+      document.querySelectorAll('#revChart .rlab')[i].setAttribute('opacity','1');
+    },i*140));io.disconnect();}});
+  io.observe(document.getElementById('revChart'));
+})();
+
+/* ---------- LIVE BVS ENGINE ---------- */
+(function(){
+  const ids=['pw','ed','sl','oa'],beta=2.0;
+  const tog=document.getElementById('paydayTog');let payday=false;
+  const read=document.getElementById('bvsRead'),stEl=document.getElementById('bvsState'),
+    needle=document.getElementById('needle'),ivH=document.getElementById('ivH'),ivP=document.getElementById('ivP');
+  const states={
+    calm:{c:'#22c55e',bg:'rgba(34,197,94,.16)',tx:'#3ad48c',label:'Calm State',h:'Passive tracking',p:'Mild goal reminders only. EQUIL stays quiet and lets you live.'},
+    stress:{c:'#FFB020',bg:'rgba(255,176,32,.16)',tx:'#FFB020',label:'Stressed State',h:'Stress Pulse',p:'One gentle, optional micro-action. No red numbers, no debt view.'},
+    avoid:{c:'#FF6A45',bg:'rgba(255,106,69,.16)',tx:'#ff8b6c',label:'Avoidant State',h:'Reassurance re-engagement',p:'Reassurance-first, zero-guilt nudge. Shows what is already covered.'},
+    payday:{c:'#2E6BF0',bg:'rgba(46,107,240,.20)',tx:'#5B93FF',label:'Payday Risk',h:'Payday Mode',p:'48-hour friction on non-essential categories. Essentials stay instant.'}
+  };
+  function compute(){
+    let sum=0;ids.forEach(k=>{const el=document.getElementById('s_'+k),val=+el.value;
+      sum+=val;el.style.setProperty('--p',(val*100)+'%');
+      document.getElementById('v_'+k).textContent=val.toFixed(2);});
+    const bvs=1/(1+Math.exp(-(sum-beta)));
+    let s; if(payday)s=states.payday; else if(bvs<0.3)s=states.calm; else if(bvs<0.7)s=states.stress; else s=states.avoid;
+    read.textContent=bvs.toFixed(2);read.style.color=s.c;
+    stEl.textContent=s.label;stEl.style.background=s.bg;stEl.style.color=s.tx;
+    needle.style.transform=`rotate(${(bvs-0.5)*180}deg)`;
+    ivH.textContent=s.h;ivP.textContent=s.p;
+  }
+  ids.forEach(k=>document.getElementById('s_'+k).addEventListener('input',compute));
+  function toggle(){payday=!payday;tog.classList.toggle('on',payday);tog.setAttribute('aria-checked',payday);compute();}
+  tog.onclick=toggle;tog.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};
+  compute();
+})();
+
+/* ---------- how-it-works tabs ---------- */
+const tabs=[...document.querySelectorAll('.tab')],moments=[...document.querySelectorAll('.moment')];
+tabs.forEach(t=>t.onclick=()=>{
+  const m=t.dataset.m;
+  tabs.forEach(x=>x.classList.toggle('on',x===t));
+  moments.forEach(x=>x.classList.toggle('on',x.dataset.m===m));
+});
+
+/* ---------- nav bg on scroll ---------- */
+addEventListener('scroll',()=>{
+  document.getElementById('nav').style.background=scrollY>40?'rgba(8,21,47,.85)':'rgba(8,21,47,.55)';
+});
+</script>
+</body>
+</html>
